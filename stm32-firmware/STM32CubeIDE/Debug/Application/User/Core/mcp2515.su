@@ -1,0 +1,11 @@
+../Application/User/Core/mcp2515.c:121:16:MCP2515_ReadRegister	32	static
+../Application/User/Core/mcp2515.c:138:13:MCP2515_WriteRegister	24	static
+../Application/User/Core/mcp2515.c:153:13:MCP2515_WriteRegisters	24	static
+../Application/User/Core/mcp2515.c:169:13:MCP2515_ReadRegisters	24	static
+../Application/User/Core/mcp2515.c:187:13:MCP2515_BitModify	24	static
+../Application/User/Core/mcp2515.c:201:13:MCP2515_Reset	16	static
+../Application/User/Core/mcp2515.c:217:26:MCP2515_SetMode	24	static
+../Application/User/Core/mcp2515.c:252:19:MCP2515_Init	16	static
+../Application/User/Core/mcp2515.c:295:19:MCP2515_Transmit	40	static
+../Application/User/Core/mcp2515.c:353:19:MCP2515_Receive	32	static
+../Application/User/Core/mcp2515.c:396:9:MCP2515_FrameAvailable	16	static

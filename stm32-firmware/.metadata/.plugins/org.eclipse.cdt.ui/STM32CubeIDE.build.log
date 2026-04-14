@@ -1,0 +1,17 @@
+23:29:00 **** Incremental Build of configuration Debug for project STM32CubeIDE ****
+make -j7 all 
+arm-none-eabi-gcc "/Users/sanjeevkumar/MyCareer/can-sensor-fusion-platform/stm32-firmware/Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F411xE -c -I../../Core/Inc -I../../Drivers/STM32F4xx_HAL_Driver/Inc -I../../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../../Drivers/CMSIS/Include -I"/Users/sanjeevkumar/MyCareer/can-sensor-fusion-platform/stm32-firmware/STM32CubeIDE/Drivers/STM32F4xx_HAL_Driver" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Application/User/Core/main.d" -MT"Application/User/Core/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Application/User/Core/main.o"
+arm-none-eabi-gcc -o "STM32CubeIDE.elf" @"objects.list"   -mcpu=cortex-m4 -T"/Users/sanjeevkumar/MyCareer/can-sensor-fusion-platform/stm32-firmware/STM32CubeIDE/STM32F411CEUX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32CubeIDE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: STM32CubeIDE.elf
+ 
+arm-none-eabi-size  STM32CubeIDE.elf 
+arm-none-eabi-objdump -h -S STM32CubeIDE.elf  > "STM32CubeIDE.list"
+   text	   data	    bss	    dec	    hex	filename
+  20164	     12	   1844	  22020	   5604	STM32CubeIDE.elf
+Finished building: default.size.stdout
+ 
+Finished building: STM32CubeIDE.list
+ 
+
+23:29:02 Build Finished. 0 errors, 0 warnings. (took 2s.225ms)
+

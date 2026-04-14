@@ -1,0 +1,4 @@
+/Users/sanjeevkumar/MyCareer/can-sensor-fusion-platform/stm32-firmware/Core/Src/mpu6050.c:63:26:MPU6050_WriteReg	32	static
+/Users/sanjeevkumar/MyCareer/can-sensor-fusion-platform/stm32-firmware/Core/Src/mpu6050.c:80:26:MPU6050_ReadReg	32	static
+/Users/sanjeevkumar/MyCareer/can-sensor-fusion-platform/stm32-firmware/Core/Src/mpu6050.c:109:19:MPU6050_Init	16	static
+/Users/sanjeevkumar/MyCareer/can-sensor-fusion-platform/stm32-firmware/Core/Src/mpu6050.c:172:19:MPU6050_ReadAll	48	static
