@@ -177,6 +177,27 @@ module top_level (
     );
 
     // ================================================================
+    // UART CAN Monitor — streams frame data to terminal
+    // ================================================================
+    wire uart_tx_wire;
+
+    can_uart_monitor u_uart_monitor (
+        .clk         (clk),
+        .rst_n       (rst_n),
+        .can_valid   (can_valid),
+        .can_id      (can_id),
+        .can_data    (can_data),
+        .frame_count (frame_count),
+        .accel_x     (accel_raw_x),
+        .accel_y     (accel_raw_y),
+        .accel_z     (accel_raw_z),
+        .uart_tx     (uart_tx_wire)
+    );
+
+    // Route UART TX to GPIO_0[5]
+    assign GPIO_0[5] = uart_tx_wire;
+
+    // ================================================================
     // HPS System (Qsys / Platform Designer generated)
     //
     // In a full build, Platform Designer generates an HPS wrapper
