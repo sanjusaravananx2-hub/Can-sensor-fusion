@@ -86,6 +86,7 @@ module mcp2515_controller (
     localparam ST_CLEAR_INT_CMD  = 5'd11;
     localparam ST_CLEAR_INT_WAIT = 5'd12;
     localparam ST_SPI_WAIT       = 5'd13;
+    localparam ST_DEBOUNCE       = 5'd14;
 
     reg [4:0]  state;
     reg [4:0]  return_state;       // state to return to after SPI byte
@@ -352,10 +353,25 @@ module mcp2515_controller (
                             state        <= ST_SPI_WAIT;
                         end
                         2'd3: begin
-                            spi_cs_n <= 1'b1;
-                            state    <= ST_IDLE;
+                            spi_cs_n  <= 1'b1;
+                            delay_cnt <= 24'd0;
+                            state     <= ST_DEBOUNCE;
                         end
                     endcase
+                end
+
+                // ==================================================
+                // DEBOUNCE — wait 5ms after clearing INT before
+                // checking for next frame.  Filters noise on the
+                // INT line caused by 5V MCP2515 driving 3.3V GPIO.
+                // 50 MHz * 5 ms = 250,000 clocks
+                // ==================================================
+                ST_DEBOUNCE: begin
+                    if (delay_cnt >= 24'd250_000) begin
+                        state <= ST_IDLE;
+                    end else begin
+                        delay_cnt <= delay_cnt + 24'd1;
+                    end
                 end
 
                 // ==================================================
