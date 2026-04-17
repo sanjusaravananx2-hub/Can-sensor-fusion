@@ -361,7 +361,7 @@ module mcp2515_controller (
                     can_data <= {rx_buf[5],  rx_buf[6],  rx_buf[7],  rx_buf[8],
                                  rx_buf[9],  rx_buf[10], rx_buf[11], rx_buf[12]};
                     can_valid <= 1'b1;
-                    state     <= ST_CLEAR_INT_CMD;
+                    state     <= ST_IDLE;  // READ RX BUFFER auto-clears RX0IF
                 end
 
                 // ==================================================
