@@ -268,9 +268,12 @@ module mcp2515_controller (
                 ST_IDLE: begin
                     spi_cs_n <= 1'b1;
                     if (poll_trigger) begin
-                        // Poll: read CANINTF to check if RX0IF is set
-                        state       <= ST_POLL_CMD;
-                        rx_byte_idx <= 4'd0;
+                        // Poll: READ STATUS (0xA0) — bit 0 = RX0IF
+                        spi_cs_n     <= 1'b0;
+                        spi_tx       <= 8'hA0;
+                        spi_start    <= 1'b1;
+                        return_state <= ST_POLL_READ;
+                        state        <= ST_SPI_WAIT;
                     end
                 end
 
@@ -295,7 +298,8 @@ module mcp2515_controller (
                 end
 
                 ST_POLL_READ: begin
-                    spi_tx       <= 8'h00;   // dummy byte to clock in data
+                    // Clock in status byte
+                    spi_tx       <= 8'h00;
                     spi_start    <= 1'b1;
                     return_state <= ST_POLL_CHECK;
                     state        <= ST_SPI_WAIT;
@@ -304,11 +308,10 @@ module mcp2515_controller (
                 ST_POLL_CHECK: begin
                     spi_cs_n <= 1'b1;
                     if (spi_rx[0]) begin
-                        // RX0IF is set — frame available
+                        // Bit 0 = CANINTF.RX0IF — frame available
                         state       <= ST_READ_CMD;
                         rx_byte_idx <= 4'd0;
                     end else begin
-                        // No frame — back to idle
                         state <= ST_IDLE;
                     end
                 end
