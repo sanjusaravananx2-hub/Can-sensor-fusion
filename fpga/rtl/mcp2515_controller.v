@@ -363,17 +363,8 @@ module mcp2515_controller (
                     can_data <= {rx_buf[5],  rx_buf[6],  rx_buf[7],  rx_buf[8],
                                  rx_buf[9],  rx_buf[10], rx_buf[11], rx_buf[12]};
 
-                    // Only count as new frame if data bytes changed
-                    if (rx_buf[5] != prev_d0 || rx_buf[6] != prev_d1 ||
-                        rx_buf[7] != prev_d2 || rx_buf[8] != prev_d3) begin
-                        can_valid <= 1'b1;
-                        prev_d0   <= rx_buf[5];
-                        prev_d1   <= rx_buf[6];
-                        prev_d2   <= rx_buf[7];
-                        prev_d3   <= rx_buf[8];
-                    end
-
-                    state <= ST_IDLE;
+                    can_valid <= 1'b1;
+                    state     <= ST_IDLE;
                 end
 
                 // ==================================================
