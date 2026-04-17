@@ -128,6 +128,9 @@ module mcp2515_controller (
     reg [7:0]  rx_buf [0:12];
     reg [3:0]  rx_byte_idx;
 
+    // Previous frame data — for duplicate detection
+    reg [7:0]  prev_d0, prev_d1, prev_d2, prev_d3;
+
     // ----------------------------------------------------------------
     // Delay / timeout counter
     // ----------------------------------------------------------------
@@ -268,12 +271,9 @@ module mcp2515_controller (
                 ST_IDLE: begin
                     spi_cs_n <= 1'b1;
                     if (poll_trigger) begin
-                        // Poll: READ STATUS (0xA0) — bit 0 = RX0IF
-                        spi_cs_n     <= 1'b0;
-                        spi_tx       <= 8'hA0;
-                        spi_start    <= 1'b1;
-                        return_state <= ST_POLL_READ;
-                        state        <= ST_SPI_WAIT;
+                        // Read RX buffer directly every poll
+                        state       <= ST_READ_CMD;
+                        rx_byte_idx <= 4'd0;
                     end
                 end
 
@@ -358,13 +358,22 @@ module mcp2515_controller (
                 // ==================================================
                 ST_PARSE: begin
                     // Standard ID from SIDH[7:0] and SIDL[7:5]
-                    // SIDH = rx_buf[0], SIDL = rx_buf[1]
                     can_id  <= {rx_buf[0], rx_buf[1][7:5]};
                     can_dlc <= rx_buf[4][3:0];
                     can_data <= {rx_buf[5],  rx_buf[6],  rx_buf[7],  rx_buf[8],
                                  rx_buf[9],  rx_buf[10], rx_buf[11], rx_buf[12]};
-                    can_valid <= 1'b1;
-                    state     <= ST_IDLE;  // READ RX BUFFER auto-clears RX0IF
+
+                    // Only count as new frame if data bytes changed
+                    if (rx_buf[5] != prev_d0 || rx_buf[6] != prev_d1 ||
+                        rx_buf[7] != prev_d2 || rx_buf[8] != prev_d3) begin
+                        can_valid <= 1'b1;
+                        prev_d0   <= rx_buf[5];
+                        prev_d1   <= rx_buf[6];
+                        prev_d2   <= rx_buf[7];
+                        prev_d3   <= rx_buf[8];
+                    end
+
+                    state <= ST_IDLE;
                 end
 
                 // ==================================================
