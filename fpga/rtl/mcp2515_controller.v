@@ -87,6 +87,10 @@ module mcp2515_controller (
     localparam ST_CLEAR_INT_WAIT = 5'd12;
     localparam ST_SPI_WAIT       = 5'd13;
     localparam ST_DEBOUNCE       = 5'd14;
+    localparam ST_POLL_CMD       = 5'd15;
+    localparam ST_POLL_ADDR      = 5'd16;
+    localparam ST_POLL_READ      = 5'd17;
+    localparam ST_POLL_CHECK     = 5'd18;
 
     reg [4:0]  state;
     reg [4:0]  return_state;       // state to return to after SPI byte
@@ -131,19 +135,24 @@ module mcp2515_controller (
     localparam RESET_DELAY = 24'd500_000;  // 10 ms at 50 MHz
 
     // ----------------------------------------------------------------
-    // Interrupt synchroniser and edge detector
+    // Poll timer — check MCP2515 every 50ms instead of using INT pin
+    // 50 MHz * 50 ms = 2,500,000 clocks
     // ----------------------------------------------------------------
-    reg [2:0] int_sync;
-    wire      int_falling;
+    reg [21:0] poll_timer;
+    reg        poll_trigger;
 
     always @(posedge clk) begin
-        if (!rst_n)
-            int_sync <= 3'b111;
-        else
-            int_sync <= {int_sync[1:0], int_n};
+        if (!rst_n) begin
+            poll_timer   <= 22'd0;
+            poll_trigger <= 1'b0;
+        end else if (poll_timer >= 22'd2_500_000) begin
+            poll_timer   <= 22'd0;
+            poll_trigger <= 1'b1;
+        end else begin
+            poll_timer   <= poll_timer + 22'd1;
+            poll_trigger <= 1'b0;
+        end
     end
-
-    assign int_falling = int_sync[2] & ~int_sync[1];
 
     // ----------------------------------------------------------------
     // SPI byte send helper
@@ -258,9 +267,49 @@ module mcp2515_controller (
                 // ==================================================
                 ST_IDLE: begin
                     spi_cs_n <= 1'b1;
-                    if (int_falling) begin
+                    if (poll_trigger) begin
+                        // Poll: read CANINTF to check if RX0IF is set
+                        state       <= ST_POLL_CMD;
+                        rx_byte_idx <= 4'd0;
+                    end
+                end
+
+                // ==================================================
+                // POLL — read CANINTF register to check for frame
+                // READ command: CS low -> 0x03 -> 0x2C -> read byte -> CS high
+                // ==================================================
+                ST_POLL_CMD: begin
+                    spi_cs_n     <= 1'b0;
+                    spi_tx       <= 8'h03;   // READ instruction
+                    spi_start    <= 1'b1;
+                    cfg_byte_cnt <= 2'd0;
+                    return_state <= ST_POLL_ADDR;
+                    state        <= ST_SPI_WAIT;
+                end
+
+                ST_POLL_ADDR: begin
+                    spi_tx       <= 8'h2C;   // CANINTF address
+                    spi_start    <= 1'b1;
+                    return_state <= ST_POLL_READ;
+                    state        <= ST_SPI_WAIT;
+                end
+
+                ST_POLL_READ: begin
+                    spi_tx       <= 8'h00;   // dummy byte to clock in data
+                    spi_start    <= 1'b1;
+                    return_state <= ST_POLL_CHECK;
+                    state        <= ST_SPI_WAIT;
+                end
+
+                ST_POLL_CHECK: begin
+                    spi_cs_n <= 1'b1;
+                    if (spi_rx[0]) begin
+                        // RX0IF is set — frame available
                         state       <= ST_READ_CMD;
                         rx_byte_idx <= 4'd0;
+                    end else begin
+                        // No frame — back to idle
+                        state <= ST_IDLE;
                     end
                 end
 
@@ -353,9 +402,8 @@ module mcp2515_controller (
                             state        <= ST_SPI_WAIT;
                         end
                         2'd3: begin
-                            spi_cs_n  <= 1'b1;
-                            delay_cnt <= 24'd0;
-                            state     <= ST_DEBOUNCE;
+                            spi_cs_n <= 1'b1;
+                            state    <= ST_IDLE;
                         end
                     endcase
                 end
