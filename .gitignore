@@ -1,0 +1,27 @@
+# Build output
+Debug/
+Release/
+*.o
+*.d
+*.elf
+*.map
+*.su
+*.bin
+*.hex
+*.lst
+
+# IDE / workspace metadata
+.metadata/
+.settings/
+*.pdom
+
+# Quartus / FPGA intermediates
+db/
+incremental_db/
+output_files/
+simulation/
+greybox_tmp/
+
+# OS
+.DS_Store
+Thumbs.db

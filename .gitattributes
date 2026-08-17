@@ -1,0 +1,9 @@
+# Vendor code: ST HAL, CMSIS and CMSIS-DSP are not authored here.
+# Excluding them from language stats so the repo reports the RTL and
+# application code that was actually written for this project.
+stm32-firmware/Drivers/**            linguist-vendored
+stm32-firmware/**/CMSIS/**           linguist-vendored
+stm32-firmware/STM32CubeIDE/Debug/** linguist-generated
+
+# Ensure the FPGA sources are detected as Verilog
+*.v  linguist-language=Verilog
